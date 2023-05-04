@@ -1,40 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [values, setValues] = React.useState({
+  const [values, setValues] = useState({
     usuario: 'omariosouto',
-    senha: 'safepassword',
+    senha: 'safepassword'
   });
 
-  function handleChange(event) {
-    const fieldValue = event.target.value;
-    const fieldName = event.target.name;
+  const handleChange = (e) => {
+    const fieldName = [e.target.name];
+    const fieldValue = [e.target.value];
+
+
     setValues((currentValues) => {
-      return {
-        ...currentValues,
-        [fieldName]: fieldValue,
-      };
+      return {...currentValues, [fieldName]: fieldValue}
     })
   }
 
   return (
     <div>
       <h1>Login</h1>
-      <form onSubmit={(event) => {
-        event.preventDefault();
-
-        // router.push('/auth-page-static');
+      <form onSubmit={(e) =>{
+        e.preventDefault()
+        authService.login({ 
         router.push('/auth-page-ssr');
+        router.push('/auth-page-static');
       }}>
         <input
           placeholder="Usuário" name="usuario"
-          value={values.usuario} onChange={handleChange}
+          value={values.usuario}
+          onChange={handleChange}
         />
         <input
           placeholder="Senha" name="senha" type="password"
-          value={values.senha} onChange={handleChange}
+          value={values.senha}
         />
         {/* <pre>
           {JSON.stringify(values, null, 2)}

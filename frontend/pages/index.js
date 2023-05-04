@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import { authService } from '../src/services/auth/authService';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -12,7 +13,6 @@ export default function HomeScreen() {
     const fieldName = [e.target.name];
     const fieldValue = [e.target.value];
 
-
     setValues((currentValues) => {
       return {...currentValues, [fieldName]: fieldValue}
     })
@@ -23,9 +23,18 @@ export default function HomeScreen() {
       <h1>Login</h1>
       <form onSubmit={(e) =>{
         e.preventDefault()
+
         authService.login({ 
-        router.push('/auth-page-ssr');
-        router.push('/auth-page-static');
+          username: values.usuario,
+          password: values.senha
+        })
+        .then(() => {
+          router.push('/auth-page-ssr');
+          //router.push('/auth-page-static');
+        })
+        .catch(() => {
+          alert('Username or password invalid.')
+        });
       }}>
         <input
           placeholder="Usuário" name="usuario"

@@ -1,12 +1,14 @@
-export function httpClient(fetchUrl, fetchOptions) {
-    return fetch(fetchUrl, {
-        ...fetchOptions,
+export function httpClient(fetchUrl, options) {
+    const opt = {
+        ...options,
         headers: {
-            ...fetchOptions.headers,
+            ...options.headers,
             'Content-Type': 'application/json'
         },
-        body: fetchOptions.body ? JSON.stringify(fetchOptions.body) : null
-    })
+        body: options.body ? JSON.stringify(options.body) : null
+    };
+    
+    return fetch(fetchUrl, opt)
     .then(async (res) => {
         return {
             ok: res.ok,

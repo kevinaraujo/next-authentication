@@ -1,4 +1,5 @@
 import { httpClient } from "../../infra/httpClient";
+import { tokenService } from './tokenService'
 
 export const authService =  {
     async login({ username, password }) {
@@ -9,9 +10,12 @@ export const authService =  {
                 password
             }
         })
-        .then((res) => {
+        .then(async (res) => {
+            //if (!res.ok) throw new Error('Username or password invalid.');
+            const { body } = res;
             
-            console.log('@res', res);
+            console.log('@body', body.data.access_token);
+            tokenService.save(body.data.access_token);
         })
     }
 }

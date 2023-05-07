@@ -32,7 +32,8 @@ export default function HomeScreen() {
           router.push('/auth-page-ssr');
           //router.push('/auth-page-static');
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err);
           alert('Username or password invalid.')
         });
       }}>

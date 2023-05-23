@@ -17,5 +17,19 @@ export const authService =  {
             console.log('@body', body.data.access_token);
             tokenService.save(body.data.access_token);
         })
+    },
+    async getSession(ctx) {
+        const token = tokenService.get(ctx);
+
+        return httpClient(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/session`, {
+            method: 'GET',
+            headers: {
+                'Authorization' : `Bearer ${token}`
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Not Authorized.');
+            return res.body.data;
+        })
     }
 }

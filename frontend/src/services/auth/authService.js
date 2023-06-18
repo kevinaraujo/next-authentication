@@ -11,11 +11,22 @@ export const authService =  {
             }
         })
         .then(async (res) => {
-            //if (!res.ok) throw new Error('Username or password invalid.');
+            if (!res.ok) throw new Error('Username or password invalid.');
+
             const { body } = res;
-            
-            console.log('@body', body.data.access_token);
             tokenService.save(body.data.access_token);
+
+            return body;
+        })
+        .then(async ({ data }) => {
+            const { refresh_token } = data; 
+            const res = await httpClient('/api/refresh', {
+                method: 'POST',
+                body: {
+                    refresh_token
+                }
+            });
+            console.log(res);
         })
     },
     async getSession(ctx = null) {

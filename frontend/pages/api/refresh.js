@@ -1,4 +1,5 @@
 import nookies from 'nookies';
+import { httpClient } from '../../src/infra/httpClient';
 
 const REFRESH_TOKEN_NAME = 'REFRESH_TOKEN_NAME';
 const controllers = {
@@ -12,7 +13,7 @@ const controllers = {
             req.body.refresh_token, 
             {
                 httpOnly: true,
-                sameSite: 'Lax'
+                sameSite: 'lax'
             }
         );
 
@@ -30,12 +31,44 @@ const controllers = {
                 cookies: nookies.get(ctx)
             }
         })
+    },
+    async regenerateTokens(req, res) {
+        const ctx = { req, res };
+        const cookies = nookies.get(ctx);
+        const refresh_token = cookies[REFRESH_TOKEN_NAME];
+
+        const response = await httpClient(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/refresh`, {
+            method: 'POST',
+            body: {
+                refresh_token
+            }
+        });
+
+        if (response.ok) {
+            nookies.set(ctx, REFRESH_TOKEN_NAME, response.body.data.refresh_token, {
+                httpOnly: true,
+                sameSite: 'lax'
+            });
+
+            console.log(response.body.data.refresh_token);
+
+            res.json({
+                response
+            });
+            
+        } else {
+            res.json({
+                status: 401,
+                message: 'Not Authorized'
+            });
+        }
     }
 }
 
 const controllersBy = {
     POST: controllers.storeRefreshToken,
-    GET: controllers.displayCookies
+    GET: controllers.regenerateTokens
+    // GET: controllers.displayCookies
 }
 
 export default function handler(req, res) {

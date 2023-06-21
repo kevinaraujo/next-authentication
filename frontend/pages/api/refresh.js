@@ -1,5 +1,6 @@
 import nookies from 'nookies';
 import { httpClient } from '../../src/infra/httpClient';
+import { tokenService } from '../../src/services/auth/tokenService';
 
 const REFRESH_TOKEN_NAME = 'REFRESH_TOKEN_NAME';
 const controllers = {
@@ -13,7 +14,8 @@ const controllers = {
             req.body.refresh_token, 
             {
                 httpOnly: true,
-                sameSite: 'lax'
+                sameSite: 'lax',
+                path: '/'
             }
         );
 
@@ -22,15 +24,6 @@ const controllers = {
                 message: 'Saved successfully!'
             }
         });        
-    },
-    async displayCookies(req, res) {
-        const ctx = { req, res };
-
-        res.json({
-            data: {
-                cookies: nookies.get(ctx)
-            }
-        })
     },
     async regenerateTokens(req, res) {
         const ctx = { req, res };
@@ -47,22 +40,33 @@ const controllers = {
         if (response.ok) {
             nookies.set(ctx, REFRESH_TOKEN_NAME, response.body.data.refresh_token, {
                 httpOnly: true,
-                sameSite: 'lax'
+                sameSite: 'lax',
+                path: '/'
             });
 
-            console.log(response.body.data.refresh_token);
+            tokenService.save(response.body.data.access_token, ctx);
 
-            res.json({
-                response
+            res.status(200).json({
+                data: response.body.data
             });
-            
+
+
         } else {
-            res.json({
+            res.status(401).json({
                 status: 401,
                 message: 'Not Authorized'
             });
         }
-    }
+    },
+    async displayCookies(req, res) {
+        const ctx = { req, res };
+
+        res.json({
+            data: {
+                cookies: nookies.get(ctx)
+            }
+        })
+    },
 }
 
 const controllersBy = {

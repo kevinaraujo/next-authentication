@@ -29,8 +29,8 @@ export default function HomeScreen() {
           password: values.senha
         })
         .then(() => {
-          // router.push('/auth-page-ssr');
-          router.push('/auth-page-static');
+          router.push('/auth-page-ssr');
+          //router.push('/auth-page-static');
         })
         .catch((err) => {
           console.log(err);
@@ -45,6 +45,7 @@ export default function HomeScreen() {
         <input
           placeholder="Senha" name="senha" type="password"
           value={values.senha}
+          onChange={handleChange}
         />
         {/* <pre>
           {JSON.stringify(values, null, 2)}

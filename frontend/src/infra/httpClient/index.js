@@ -1,4 +1,5 @@
 import { tokenService } from "../../services/auth/tokenService";
+import nookies from 'nookies';
 
 export function httpClient(fetchUrl, options) {
     const opt = {
@@ -23,27 +24,48 @@ export function httpClient(fetchUrl, options) {
         if (!options.refresh) return res;
         if (res.status !== 401) return res;
 
+        const isServer = Boolean(options.ctx); console.log('isServer', isServer);
+        const currentRefreshToken = options.ctx?.req?.cookies['REFRESH_TOKEN_NAME'];
+         
         console.log('Middleware: Tentar atualizar com o refresh');
-        // [Tentar atualizar os tokens]
-        const refreshResponse = await httpClient('http://localhost:3000/api/refresh', {
-            method: 'GET'
-        });
 
-        const newAccessToken = refreshResponse.body.data.access_token;
-        const newRefreshToken = refreshResponse.body.data.refresh_token;
+        try {
+            // [Tentar atualizar os tokens]
+            const refreshResponse = await httpClient('http://localhost:3000/api/refresh', {
+                method: isServer ? 'PUT' : 'GET',
+                body: isServer ? { refresh_token: currentRefreshToken } : undefined
+            });
 
-        // [ Guarda os Tokens]
-        tokenService.save(newAccessToken);
+            const newAccessToken = refreshResponse.body.data.access_token;
+            const newRefreshToken = refreshResponse.body.data.refresh_token;
 
-        // [Tentar rodar o request anterior]
-        const retryResponse = await httpClient(fetchUrl, {
-            ...options,
-            refresh: false,
-            headers: {
-                'Authorization' : `Bearer ${newAccessToken}`
+            // [ Guarda os Tokens]
+            if (isServer) {
+                nookies.set(options.ctx, 'REFRESH_TOKEN_NAME', newRefreshToken, {
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    path: '/'
+                });
             }
-        })
+            
+            tokenService.save(newAccessToken);
+
+            
+            // [Tentar rodar o request anterior]
+            const retryResponse = await httpClient(fetchUrl, {
+                ...options,
+                refresh: false,
+                headers: {
+                    'Authorization' : `Bearer ${newAccessToken}`
+                }
+            })
+            console.log('retryResponse', retryResponse);
+            return retryResponse;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+
         
-        return retryResponse;
     });
 }

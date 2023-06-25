@@ -6,7 +6,6 @@ const REFRESH_TOKEN_NAME = 'REFRESH_TOKEN_NAME';
 const controllers = {
     async storeRefreshToken(req, res) {
         const ctx = { req, res };
-        console.log('ress', req.body);
 
         nookies.set(
             ctx, 
@@ -28,7 +27,9 @@ const controllers = {
     async regenerateTokens(req, res) {
         const ctx = { req, res };
         const cookies = nookies.get(ctx);
-        const refresh_token = cookies[REFRESH_TOKEN_NAME];
+        const refresh_token = cookies[REFRESH_TOKEN_NAME] || req.body.refresh_token;
+
+        console.log('/api/refresh [ regenerateTokens ]', refresh_token);
 
         const response = await httpClient(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/refresh`, {
             method: 'POST',
@@ -71,7 +72,8 @@ const controllers = {
 
 const controllersBy = {
     POST: controllers.storeRefreshToken,
-    GET: controllers.regenerateTokens
+    GET: controllers.regenerateTokens,
+    PUT: controllers.regenerateTokens
     // GET: controllers.displayCookies
 }
 

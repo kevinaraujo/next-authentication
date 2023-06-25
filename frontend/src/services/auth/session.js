@@ -8,7 +8,6 @@ export function withSession(func) {
         try {
             const session = await authService.getSession(ctx);
 
-            console.log(ctx);
             const modifiedContext = { 
                 ...ctx,
                 req: {

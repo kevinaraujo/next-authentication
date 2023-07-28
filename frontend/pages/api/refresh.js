@@ -73,7 +73,22 @@ const controllers = {
 const controllersBy = {
     POST: controllers.storeRefreshToken,
     GET: controllers.regenerateTokens,
-    PUT: controllers.regenerateTokens
+    PUT: controllers.regenerateTokens,
+    DELETE: (req, res) => {
+        const ctx = { req, res };
+
+        nookies.destroy(ctx, REFRESH_TOKEN_NAME, {
+            httpOnly: true,
+            sameSite: 'lax',
+            path: '/'
+        })
+
+        res.json({
+            data: {
+                message: 'Deleted successfully!'
+            } 
+        })
+    }
     // GET: controllers.displayCookies
 }
 
